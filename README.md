@@ -38,7 +38,8 @@ Via a PHP file :
     use Teknoo\ReactPHPBundle\Bridge\RequestListener;
     use Teknoo\ReactPHPBundle\Service\DatesService;
     use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
-    use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+    use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
+    use Nyholm\Psr7\Factory\Psr17Factory;
 
     require __DIR__.'/../app/autoload.php';
     if (\file_exists(__DIR__.'/../var/bootstrap.php.cache')) {
@@ -48,18 +49,19 @@ Via a PHP file :
     $kernel = new AppKernel('prod', false);
     $kernel->loadClassCache();
 
+    $psr17Factory = new Psr17Factory();
     $requestBridge = new RequestBridge(
         $kernel,
         new DatesService(),
         new HttpFoundationFactory(),
-        new DiactorosFactory()
+        new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory)
     );
     $requestListener = new RequestListener($requestBridge);
 
     //React Loop
     $loop = LoopFactory::create();
     //Create front socket server
-    $socket = new SocketServer(8080, $loop);
+    $socket = new SocketServer("127.0.0.1:8080", $loop);
 
     //Enable HTTP server
     $server = new HttpServer($requestListener);

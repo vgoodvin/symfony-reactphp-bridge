@@ -25,8 +25,8 @@ namespace Teknoo\ReactPHPBundle\Bridge;
 use Psr\Log\LoggerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Response as ReactResponse;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Symfony\Bridge\PsrHttpMessage\HttpFoundationFactoryInterface;
+use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
@@ -70,9 +70,9 @@ class RequestBridge
     /**
      * To convert Symfony Response to PSR7 Response.
      *
-     * @var DiactorosFactory
+     * @var HttpMessageFactoryInterface
      */
-    protected $diactorosFactory;
+    protected $httpMessageFactory;
 
     /**
      * To log requests result, as Apache and errors.
@@ -87,18 +87,18 @@ class RequestBridge
      * @param KernelInterface                $kernel
      * @param DatesService                   $datesService
      * @param HttpFoundationFactoryInterface $foundationFactory
-     * @param DiactorosFactory               $diactorosFactory
+     * @param HttpMessageFactoryInterface    $httpMessageFactory
      */
     public function __construct(
         KernelInterface $kernel,
         DatesService $datesService,
         HttpFoundationFactoryInterface  $foundationFactory,
-        DiactorosFactory $diactorosFactory
+        HttpMessageFactoryInterface $httpMessageFactory
     ) {
         $this->kernel = $kernel;
         $this->datesService = $datesService;
         $this->httpFoundationFcty = $foundationFactory;
-        $this->diactorosFactory = $diactorosFactory;
+        $this->httpMessageFactory = $httpMessageFactory;
     }
 
     /**
@@ -212,7 +212,7 @@ class RequestBridge
     {
         $sfResponse = $this->kernel->handle($request);
 
-        $resolve($this->diactorosFactory->createResponse($sfResponse));
+        $resolve($this->httpMessageFactory->createResponse($sfResponse));
 
         $this->terminate($request, $sfResponse);
         $this->logRequest($request, $sfResponse);
